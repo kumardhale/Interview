@@ -1,0 +1,83 @@
+#****file.yml****
+- hosts: webservers
+  become: true
+  tasks:
+  - name: Create a file
+    file: path=/home/batch-13.txt state=touch
+
+#****handler.yml****
+ - name: Handlers Example
+   hosts: webservers
+   gather_facts: false
+   tasks:
+     - name: Install httpd latest version
+       yum:
+         name: httpd
+         state: latest
+       become: true
+       notify: restart_httpd
+   handlers:
+     - name: restart_httpd
+       become: true
+       service:
+         name: httpd
+         state: started
+
+#****install-package.yml****
+- hosts: webservers
+  become: true
+  tasks:
+   - name: Install Package git
+     yum: name=git state=present
+   - name: Install Package
+     yum: name=httpd state=present
+   - name: Start httpd service
+     service: name=httpd state=started
+
+#****multipackage.yml****
+- hosts: all
+  become: yes
+  tasks:
+    - name: Update apt cache and make sure Vim, Curl and Unzip are installed
+      apt:
+        name: "{{ item }}"
+        update_cache: yes
+      loop:
+        - vim
+        - curl
+        - unzip
+
+#****os_condition.yml****
+- hosts: all
+  become: yes
+
+  tasks:
+  - name: Install Apache on Ubuntu
+    apt: name=apache2 state=present
+    when: ansible_os_family == "Debian"
+    ignore_errors: True
+
+  - name: Install httpd on Red Hat
+    yum: name=httpd state=present
+    when: ansible_os_family == "RedHat"
+    ignore_errors: True
+
+#****variable.yml****
+- hosts: all
+  vars:
+   name: batch-13
+  tasks:
+   - name: Ansible Basic Variable Example
+     debug:
+      msg: "{{ name }}"
+
+#****with_item.yml****
+- hosts: webservers
+  become: true
+  tasks:
+  - name: Create multiple directories
+    file: path={{item}} state=directory
+    with_items:
+    - '/home/vn1'
+    - '/home/vn2'
+    - '/home/vn3'
