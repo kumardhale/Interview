@@ -1,0 +1,134 @@
+#*****Nginx-Installation*****
+pipeline {
+agent any
+
+	stages {
+		stage ('install-nginx')
+		{
+			steps {
+				sh 'sudo apt update -y'
+				sh 'sudo apt install nginx -y'
+			}
+		}
+		
+		stage ('deploy-index')
+		{
+			steps {
+				sh 'sudo echo "Welcome to Young Minds. Keep Learning!! Keep Growing!!" > index.html'
+				sh 'sudo mv index.html /var/www/html/index.html'
+
+			}
+		}
+
+		stage ('Nginx-stop')
+		{
+			steps {
+				sh 'sudo systemctl stop nginx'
+			}
+		}
+
+		stage ('Start-nginx')
+		{
+			steps {
+				sh 'sudo systemctl start nginx'
+			}
+		}
+    }	
+}
+
+#*****Parallel*****
+pipeline {
+	agent any
+
+stages {
+	stage ('Parallel Stage'){
+		parallel {
+			stage	('Stage-1')
+			{
+				steps{
+				echo "Welcome to Young Minds!"
+				sleep 5
+				}
+			}	
+			stage	('Stage-2')
+			{
+				steps{
+				echo "Keep Learning!!"
+				sleep 5
+				}
+			}
+			stage	('Stage-3')
+			{
+				steps{
+				echo "Keep Growing!!"
+				sleep 5
+				}
+			}	
+	
+
+		}
+	}
+  }
+}
+
+#*****Parallel+Sequ*****
+pipeline {
+	agent any
+
+stages {
+	stage ('Parallel'){
+		parallel {
+			stage	('Stage-1')
+			{
+				steps{
+				echo "Welcome to Young Minds!"
+				sleep 5
+				}
+			}	
+			stage	('Stage-2')
+			{
+				steps{
+				echo "Keep Learning!!"
+				sleep 5
+				}
+			}
+			stage	('Stage-3')
+			{
+				steps{
+				echo "Keep Growing!!"
+				sleep 5
+				}
+			}	
+	
+
+		}
+	}
+	stage(Sequential-1)
+	{
+	  steps {
+		echo "This is sequential stage 1."
+	  }
+	}
+	
+	stage(Sequential-2)
+	{
+	  steps {
+		echo "This is sequential stage 2."
+	  }
+	}
+  }
+}
+
+#*****Trigger*****
+pipeline{
+	agent any
+
+	stages{
+		stage('Build another job')
+		{
+		 	steps {
+		  		build 'job-name'
+			}
+		}
+	}	
+}
